@@ -1,0 +1,120 @@
+; Proyecto libre · Mapa del tesoro
+; Cambia las siluetas de :costa e :isla, los nombres de :lugares
+; y el punto [x y] de :tesoro. En los mensajes, pon " antes de cada palabra.
+; Si mueves las siluetas, ajusta el punto interior de cada ZONA si hace falta.
+HAZ "costa [
+  [-205 -74] [-184 -30] [-139 -8] [-132 41]
+  [-94 87] [-37 102] [1 134] [63 123] [96 90]
+  [153 71] [177 23] [164 -8] [194 -24] [202 -62]
+  [170 -98] [121 -100] [77 -130] [6 -137]
+  [-39 -115] [-83 -124] [-131 -105] [-177 -113]
+]
+HAZ "isla [
+  [-168 -56] [-140 -37] [-119 -26] [-108 23]
+  [-78 56] [-21 73] [9 107] [48 99] [82 66]
+  [133 49] [149 24] [136 -12] [171 -37] [174 -55]
+  [155 -72] [109 -75] [62 -108] [10 -113]
+  [-30 -94] [-78 -104] [-115 -87] [-158 -88]
+]
+HAZ "lugares [
+  ["Puerto -149 -64]
+  ["Bosque -74 4]
+  ["Mirador 66 76]
+  ["Cueva 90 -65]
+]
+HAZ "tesoro [90 -65]
+HAZ "radio 20
+HAZ "pista ["Busca "donde "termina "el "camino "bajo "la "montaña.]
+HAZ "fallo ["Sigue "buscando. "Prueba "otro "lugar "de "la "isla.]
+HAZ "acierto ["¡Tesoro "encontrado!]
+
+DIBUJAMAPA
+ESCRIBE :pista
+HAZ "intentos 0
+HAZ "encontrado 0
+MIENTRAS :encontrado = 0 [
+  HAZ "punto LEECLIC
+  HAZ "intentos :intentos + 1
+  ESCRIBE LISTA "KLOGOMAPA :intentos
+  VE :punto
+  SISINO (DISTANCIA PRIMERO :tesoro ULTIMO :tesoro) <= :radio [
+    COLORLAPIZ "#934f21
+    VE :tesoro
+    ARCO 360 9
+    VE LISTA (PRIMERO :tesoro) ((ULTIMO :tesoro) + 24)
+    ROTULA "¡Tesoro!
+    ESCRIBE :acierto
+    HAZ "encontrado 1
+  ] [
+    COLORLAPIZ "#a97741
+    ARCO 360 5
+    ESCRIBE :fallo
+  ]
+  VE [0 0]
+]
+
+PARA VE :punto
+  SUBELAPIZ
+  PONXY PRIMERO :punto ULTIMO :punto
+FIN
+
+PARA TRAZA :puntos
+  VE PRIMERO :puntos
+  BAJALAPIZ
+  PARACADA "punto MENOSPRIMERO :puntos [
+    PONXY PRIMERO :punto ULTIMO :punto
+  ]
+  SUBELAPIZ
+FIN
+
+; Cierra el contorno y rellénalo desde un punto interior.
+PARA ZONA :contorno :interior :tinta
+  TRAZA PONULTIMO (PRIMERO :contorno) :contorno
+  VE :interior
+  COLORLAPIZ :tinta
+  RELLENA
+  COLORLAPIZ "#49604c
+FIN
+
+PARA PINO :x :y
+  TRAZA [
+    [:x :y] [(:x - 9) (:y + 4)] [:x (:y + 23)]
+    [(:x + 9) (:y + 4)] [:x :y] [:x (:y - 6)]
+  ]
+FIN
+
+PARA DIBUJAMAPA
+  PONCOLORFONDO "#dcebe8
+  OCULTATORTUGA
+  GROSORLAPIZ 2
+  COLORLAPIZ "#49604c
+  ZONA :costa [0 0] "#ead8a6
+  ZONA :isla [0 0] "#c6cfa3
+
+  COLORLAPIZ "#f6edcd
+  GROSORLAPIZ 3
+  TRAZA [[-149 -64] [-116 -68] [-99 -53] [-86 -21] [-74 4] [-56 18] [-24 20] [10 7] [35 -12] [56 -44] [90 -65]]
+  TRAZA [[10 7] [37 29] [51 55] [66 76]]
+
+  GROSORLAPIZ 2
+  COLORLAPIZ "#49604c
+  ZONA [[24 48] [57 99] [84 58] [101 80] [130 34] [46 35]] [61 59] "#869372
+  ZONA [[49 -49] [85 -8] [114 -35] [134 -57] [63 -58]] [89 -32] "#a5aa7b
+  ZONA [[76 -58] [76 -47] [82 -39] [91 -36] [99 -41] [104 -48] [104 -58]] [90 -49] "#51604a
+  ZONA [[-182 -71] [-151 -71] [-151 -83] [-182 -83]] [-166 -77] "#bd9667
+  PINO -73 37
+  PINO -49 48
+  PINO -40 28
+  PINO -89 22
+  PINO -28 -9
+  PINO 9 -66
+  PINO -15 -77
+  PINO 34 -84
+
+  COLORLAPIZ "#304b3c
+  PARACADA "lugar :lugares [
+    VE LISTA (ELEMENTO 2 :lugar) (ELEMENTO 3 :lugar)
+    ROTULA PRIMERO :lugar
+  ]
+  VE [0 0]
+FIN

@@ -1,0 +1,43 @@
+; Mandelbrot. Cada píxel representa un punto c del plano complejo.
+; z empieza en 0. Se repite z² + c hasta escapar o llegar al límite.
+
+PARA CALCULACOLOR :cx :cy :x :y :i
+  HAZ "color 1
+  MIENTRAS :i < 36 [
+    HAZ "siguiente :x * :x - :y * :y + :cx
+    HAZ "y 2 * :x * :y + :cy
+    HAZ "x :siguiente
+    HAZ "i :i + 1
+    SI (:x * :x + :y * :y) > 4 [
+      HAZ "color 2 + :i
+      MIENTRAS :color > 12 [HAZ "color :color - 11]
+      ALTO
+    ]
+  ]
+FIN
+
+HAZ "ancho 128
+HAZ "alto 96
+HAZ "izquierda -2.25
+HAZ "arriba 1.21875
+HAZ "anchoplano 3.25
+HAZ "altoplano 2.4375
+LIENZO :ancho :alto
+; 0 es el fondo de las filas pendientes. 1 es el interior.
+PALETA ["#192c36 "#090f1e "#172a52 "#233e73 "#335a91
+        "#477bad "#61a2c2 "#85c6cc "#b1e3cf "#e2eed3
+        "#f4d395 "#e39571 "#a95669]
+
+HAZ "fila 0
+REPITE :alto [
+  HAZ "cy :arriba - :fila * :altoplano / (:alto - 1)
+  HAZ "col 0
+  REPITE :ancho [
+    HAZ "cx :izquierda + :col * :anchoplano / (:ancho - 1)
+    CALCULACOLOR :cx :cy 0 0 0
+    PONPIXEL :col :fila :color
+    HAZ "col :col + 1
+  ]
+  HAZ "fila :fila + 1
+  ESPERA 16
+]

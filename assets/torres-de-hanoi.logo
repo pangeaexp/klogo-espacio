@@ -1,0 +1,107 @@
+; Torres de Hanói. Mueve los tres discos de A a C.
+; Cada torre es una pila. El primer elemento es el disco de arriba.
+; Escribe AC para mover de A a C, o AUTO para resolver.
+
+PARA LEEPILA :poste
+  SI :poste = "A [HAZ "pila :torrea ALTO]
+  SI :poste = "B [HAZ "pila :torreb ALTO]
+  SI :poste = "C [HAZ "pila :torrec ALTO]
+  HAZ "pila 0
+FIN
+
+PARA GUARDAPILA :poste :nueva
+  SI :poste = "A [HAZ "torrea :nueva]
+  SI :poste = "B [HAZ "torreb :nueva]
+  SI :poste = "C [HAZ "torrec :nueva]
+FIN
+
+PARA MUEVE :origen :destino
+  LEEPILA :origen
+  HAZ "salida :pila
+  LEEPILA :destino
+  HAZ "entrada :pila
+  SI :salida = 0 [ESCRIBE "TORRE-DESCONOCIDA ALTO]
+  SI :entrada = 0 [ESCRIBE "TORRE-DESCONOCIDA ALTO]
+  SI :origen = :destino [ESCRIBE "MISMA-TORRE ALTO]
+  SI ESVACIA :salida [ESCRIBE "ORIGEN-VACIO ALTO]
+
+  HAZ "disco CIMA :salida
+  SI ESVACIA :entrada = 0 [
+    SI :disco > CIMA :entrada [ESCRIBE "DESTINO-MENOR ALTO]
+  ]
+
+  GUARDAPILA :origen DESAPILA :salida
+  GUARDAPILA :destino APILA :disco :entrada
+  HAZ "movimientos :movimientos + 1
+  MUESTRATABLERO
+FIN
+
+PARA MUESTRATABLERO
+  ESCRIBE "TABLERO
+  ESCRIBE :torrea
+  ESCRIBE :torreb
+  ESCRIBE :torrec
+  ESCRIBE :movimientos
+FIN
+
+; Busca el poste actual del disco, aunque la partida ya haya comenzado.
+PARA BUSCADISCO :disco :postes
+  MIENTRAS ESVACIA :postes = 0 [
+    HAZ "posicion CIMA :postes
+    LEEPILA :posicion
+    MIENTRAS ESVACIA :pila = 0 [
+      SI CIMA :pila = :disco [ALTO]
+      HAZ "pila DESAPILA :pila
+    ]
+    HAZ "postes DESAPILA :postes
+  ]
+FIN
+
+PARA BUSCAAUXILIAR :origen :meta :postes
+  MIENTRAS ESVACIA :postes = 0 [
+    HAZ "tercera CIMA :postes
+    SI (:tercera = :origen) + (:tercera = :meta) = 0 [ALTO]
+    HAZ "postes DESAPILA :postes
+  ]
+FIN
+
+PARA RESUELVE :n :meta
+  SI :n = 0 [ALTO]
+  BUSCADISCO :n ["A "B "C]
+  RESUELVEDESDE :n :meta :posicion "A
+FIN
+
+PARA RESUELVEDESDE :n :meta :origen :auxiliar
+  SISINO :origen = :meta [
+    RESUELVE (:n - 1) :meta
+  ] [
+    BUSCAAUXILIAR :origen :meta ["A "B "C]
+    HAZ "auxiliar :tercera
+    RESUELVE (:n - 1) :auxiliar
+    MUEVE :origen :meta
+    ESPERA 460
+    RESUELVE (:n - 1) :meta
+  ]
+FIN
+
+HAZ "torrea [1 2 3]
+HAZ "torreb []
+HAZ "torrec []
+HAZ "movimientos 0
+MUESTRATABLERO
+MIENTRAS 1 [
+  HAZ "jugada NORMALIZAPALABRA LEEPALABRA
+  SISINO :jugada = "AUTO [
+    RESUELVE 3 "C
+  ] [
+    SISINO CUENTA :jugada = 2 [
+      MUEVE (LETRA 1 :jugada) (LETRA 2 :jugada)
+    ] [
+      ESCRIBE "ESCRIBE-DOS-TORRES
+    ]
+  ]
+  SI :torrec = [1 2 3] [
+    ESCRIBE "VICTORIA
+    ALTO
+  ]
+]

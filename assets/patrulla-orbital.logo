@@ -1,0 +1,157 @@
+; Patrulla orbital. Defiende la estación durante tres oleadas.
+; Prueba a cambiar la energía inicial o el orden de los carriles.
+
+PARA INFORME :estado
+  ESCRIBE ["PATRULLA :oleada :puntos :energia :estado]
+FIN
+
+PARA PREPARAOLEADA :carriles :fila
+  HAZ "drones []
+  MIENTRAS ESVACIA :carriles = 0 [
+    HAZ "drones APILA [CIMA :carriles :fila] :drones
+    HAZ "carriles DESAPILA :carriles
+    HAZ "fila :fila - (9 - :oleada)
+  ]
+  HAZ "tirocarril 0
+FIN
+
+PARA CONTROLA :orden
+  SI :orden = "IZQUIERDA [MUEVE -1]
+  SI :orden = "DERECHA [MUEVE 1]
+  SI :orden = "IZQUIERDATIRO [MUEVE -1 DISPARA]
+  SI :orden = "DERECHATIRO [MUEVE 1 DISPARA]
+  SI :orden = "TIRO [DISPARA]
+FIN
+
+PARA MUEVE :paso
+  HAZ "destino :nave + :paso
+  SI :destino < 1 [ALTO]
+  SI :destino > 5 [ALTO]
+  HAZ "nave :destino
+FIN
+
+PARA DISPARA
+  SI :tirocarril > 0 [ALTO]
+  HAZ "tirocarril :nave
+  HAZ "tirofila 27
+FIN
+
+PARA PROCESADRONE :carril :fila
+  ; Comprueba todo el recorrido del pulso para que no atraviese el dron.
+  SI :tirocarril = :carril [
+    SI :fila > 1 [
+      SI :tiroantes > (:fila - 2) [
+        SI :tirofila < (:fila + 2) [
+          HAZ "puntos :puntos + 1
+          HAZ "tirocarril 0
+          INFORME "ACTIVA
+          ALTO
+        ]
+      ]
+    ]
+  ]
+  SI :fila > 28 [
+    HAZ "energia :energia - 1
+    INFORME "ACTIVA
+    ALTO
+  ]
+  HAZ "drones APILA [:carril :fila] :drones
+FIN
+
+PARA PASO :orden
+  CONTROLA :orden
+  HAZ "tiroantes :tirofila
+  SI :tirocarril > 0 [HAZ "tirofila :tirofila - 4]
+  HAZ "pendientes :drones
+  HAZ "drones []
+  MIENTRAS ESVACIA :pendientes = 0 [
+    HAZ "dron CIMA :pendientes
+    PROCESADRONE (ELEMENTO 1 :dron) ((ELEMENTO 2 :dron) + 1)
+    HAZ "pendientes DESAPILA :pendientes
+  ]
+  SI :tirofila < 0 [HAZ "tirocarril 0]
+FIN
+
+PARA HORIZONTAL :x :y :largo :tinta
+  REPITE :largo [
+    PONPIXEL :x :y :tinta
+    HAZ "x :x + 1
+  ]
+FIN
+
+PARA PINTADRONE :x :y
+  SI :y < 1 [ALTO]
+  PONPIXEL :x (:y - 1) 3
+  HORIZONTAL (:x - 2) :y 5 3
+  PONPIXEL :x :y 4
+  HORIZONTAL (:x - 1) (:y + 1) 3 3
+FIN
+
+PARA PINTANAVE :x
+  PONPIXEL :x 27 2
+  HORIZONTAL (:x - 1) 28 3 2
+  HORIZONTAL (:x - 2) 29 5 2
+  PONPIXEL :x 29 4
+  PONPIXEL (:x - 2) 30 2
+  PONPIXEL (:x + 2) 30 2
+FIN
+
+PARA DIBUJA
+  LIENZO 55 34
+  PALETA ["#10162b "#314365 "#68eadf "#ff879b "#ffe29a "#799cbc]
+
+  ; Balizas de aproximación y línea de defensa.
+  HAZ "carril 1
+  REPITE 5 [
+    HAZ "baliza ELEMENTO :carril :centros
+    HAZ "y 2
+    REPITE 6 [
+      PONPIXEL :baliza :y 1
+      HAZ "y :y + 4
+    ]
+    PONPIXEL :baliza 31 5
+    HAZ "carril :carril + 1
+  ]
+  HORIZONTAL 0 32 55 1
+  HAZ "modulo 21
+  REPITE :energia [
+    HORIZONTAL :modulo 33 3 2
+    HAZ "modulo :modulo + 5
+  ]
+
+  HAZ "visible :drones
+  MIENTRAS ESVACIA :visible = 0 [
+    HAZ "figura CIMA :visible
+    PINTADRONE (ELEMENTO (ELEMENTO 1 :figura) :centros) (ELEMENTO 2 :figura)
+    HAZ "visible DESAPILA :visible
+  ]
+  PINTANAVE ELEMENTO :nave :centros
+  SI :tirocarril > 0 [
+    PONPIXEL (ELEMENTO :tirocarril :centros) :tirofila 4
+  ]
+FIN
+
+HAZ "centros [7 17 27 37 47]
+HAZ "oleadas [[3 5 1] [2 4 3] [5 1 4]]
+HAZ "oleada 1
+HAZ "energia 3
+HAZ "puntos 0
+HAZ "nave 3
+HAZ "tirofila 0
+
+REPITE CUENTA :oleadas [
+  PREPARAOLEADA (ELEMENTO :oleada :oleadas) 6
+  INFORME "ACTIVA
+  DIBUJA
+  MIENTRAS ESVACIA :drones = 0 [
+    PASO LEEPALABRA
+    SI :energia = 0 [
+      DIBUJA
+      INFORME "DERROTA
+      ALTO
+    ]
+    DIBUJA
+  ]
+  SI :oleada < CUENTA :oleadas [HAZ "oleada :oleada + 1]
+]
+INFORME "VICTORIA

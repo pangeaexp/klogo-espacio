@@ -1,0 +1,178 @@
+---
+title: "Aula · sonda"
+kunobi:
+  webEdits: write
+  rooms:
+    aula:
+      model: map
+      rules:
+        host: [clase]
+        own: [alumno, pulsos, entrega, mano]
+---
+
+import React, { useEffect, useRef, useState } from 'react'
+import { useSession } from 'kunobi'
+
+# Aula · sonda
+
+Prueba del 24 nov 2026 para el Aula de KLogo (vuelve a [KLogo](../index.mdx)): comprueba cuántos alumnos caben en una sala de Kunobi, sobre todo si entran por un mismo enlace web. No usa Logo. Cada alumno escribe solo sus propias claves y el anfitrión (quien aloja la sala) escribe `clase`.
+
+**Pasos:**
+
+1. El anfitrión abre esta página en Kunobi y pulsa «Abrir clase».
+2. Cada alumno escribe su nombre y pulsa «Entrar». Luego «Pulsar» unas veces y «Levantar la mano».
+3. «Entrega de N KB» mide hasta qué tamaño acepta la sala una operación. «Ráfaga» envía 30 operaciones seguidas para ver el ritmo.
+4. Copiad «Resultado para el agente».
+
+<Sonda />
+
+export const KB = [1, 4, 16, 64, 128]
+
+export function Sonda() {
+  const sala = useSession('aula', { model: 'map' })
+  const [nombre, setNombre] = useState('')
+  const [registro, setRegistro] = useState([])
+  const [historial, setHistorial] = useState([])
+  const cargada = useRef(Date.now())
+
+  const estadoSala = sala ? sala.status : 'sin sesión'
+  const abierta = estadoSala === 'open'
+  const legible = abierta || estadoSala === 'paused'
+  const estado = legible && sala.state ? sala.state : {}
+  const actor = legible ? sala.actor || null : null
+  const yo = actor ? actor.id : null
+  const participantes = legible && sala.participants ? sala.participants : []
+  const clase = estado.clase || null
+  const soyAnfitrion = !!(clase && yo && clase.anfitrion === yo)
+
+  const porPrefijo = (prefijo) => Object.keys(estado)
+    .filter((k) => k.startsWith(prefijo + '.'))
+    .map((k) => [k.slice(prefijo.length + 1), estado[k]])
+  const alumnos = porPrefijo('alumno')
+  const manos = porPrefijo('mano').filter(([, v]) => v)
+  const pulsos = Object.fromEntries(porPrefijo('pulsos'))
+  const entregas = porPrefijo('entrega').map(([id, v]) => [id, v && v.datos ? v.datos.length : 0])
+  const bytesEstado = JSON.stringify(estado).length
+
+  useEffect(() => {
+    setHistorial((h) => h.concat([{
+      tras_s: Math.round((Date.now() - cargada.current) / 100) / 10,
+      status: estadoSala,
+      revision: legible ? sala.revision : null,
+      refusal: sala && sala.refusal ? sala.refusal : null,
+    }]))
+  }, [estadoSala])
+
+  const anotar = (etiqueta, clave, t0, res) => setRegistro((a) => a.concat([{
+    hora: new Date(t0).toISOString().slice(11, 23),
+    etiqueta,
+    clave,
+    status: res && res.status ? res.status : String(res),
+    reason: res && res.reason ? String(res.reason).slice(0, 200) : '',
+    ms: Date.now() - t0,
+  }]))
+
+  const enviar = (etiqueta, op) => {
+    const t0 = Date.now()
+    let r
+    try { r = sala.apply(op) } catch (e) { anotar(etiqueta, op.key, t0, { status: 'excepción', reason: String(e) }); return Promise.resolve() }
+    return Promise.resolve(r).then((res) => anotar(etiqueta, op.key, t0, res), (e) => anotar(etiqueta, op.key, t0, { status: 'rechazo', reason: String(e) }))
+  }
+
+  const rafaga = () => {
+    const t0 = Date.now()
+    const cuentas = {}
+    const envios = []
+    for (let i = 0; i < 30; i++) {
+      let r
+      try { r = sala.apply({ type: 'add', key: 'pulsos.' + yo, by: 1 }) } catch (e) { r = { status: 'excepción' } }
+      envios.push(Promise.resolve(r).then((res) => res && res.status ? res.status : String(res), () => 'rechazo'))
+    }
+    Promise.all(envios).then((sts) => {
+      for (const s of sts) cuentas[s] = (cuentas[s] || 0) + 1
+      anotar('ráfaga 30', 'pulsos.' + yo, t0, { status: Object.entries(cuentas).map(([k, v]) => k + '×' + v).join(' ') })
+    })
+  }
+
+  const limpiar = () => {
+    for (const k of Object.keys(estado)) {
+      if (k === 'clase') continue
+      enviar('limpiar', { type: 'delete', key: k })
+    }
+  }
+
+  const resumen = JSON.stringify({
+    prueba: 'aula-sonda',
+    hora: new Date().toISOString(),
+    status: estadoSala,
+    refusal: sala && sala.refusal ? sala.refusal : null,
+    revision: legible ? sala.revision : null,
+    actor,
+    soyAnfitrion,
+    descriptor: sala && sala.descriptor ? sala.descriptor : null,
+    participantes: participantes.map((p) => ({ id: p.id, kind: p.kind, role: p.role, self: !!p.self, name: p.name || null })),
+    alumnos: alumnos.map(([id, v]) => ({ id, nombre: v && v.nombre })),
+    manos: manos.map(([id]) => id),
+    pulsos,
+    entregas,
+    bytesEstado,
+    historial,
+    registro,
+    claves: sala ? Object.keys(sala) : [],
+  }, null, 1)
+
+  const caja = { border: '1px solid rgba(128,128,128,0.4)', borderRadius: 8, padding: 12, margin: '12px 0', minWidth: 0 }
+  const fila = { display: 'flex', flexWrap: 'wrap', gap: 8, margin: '8px 0', alignItems: 'center' }
+  const boton = { padding: '6px 10px', borderRadius: 6, border: '1px solid rgba(128,128,128,0.6)', cursor: 'pointer' }
+
+  return (
+    <div style={{ maxWidth: 760, minWidth: 0 }}>
+      <div style={caja} data-testid="estado">
+        <strong>Sala:</strong> <code data-testid="status">{estadoSala}</code>
+        {' · '}revisión <code>{legible ? String(sala.revision) : '—'}</code>
+        {' · '}yo: <code data-testid="actor">{yo || 'sin actor'}</code>{actor && actor.kind ? ' (' + actor.kind + ')' : ''}
+        {soyAnfitrion ? ' · anfitrión' : ''}
+        {sala && sala.refusal ? <div>Motivo: <code>{JSON.stringify(sala.refusal)}</code></div> : null}
+        <div style={{ marginTop: 6 }}>
+          Participantes: <strong data-testid="participantes">{participantes.length}</strong>
+          {' · '}alumnos: <strong data-testid="alumnos">{alumnos.length}</strong>
+          {' · '}manos: <strong>{manos.length}</strong>
+          {' · '}estado: <strong>{Math.round(bytesEstado / 1024)} KB</strong>
+          {' · '}clase: <code>{clase ? clase.id : 'sin abrir'}</code>
+        </div>
+      </div>
+
+      <div style={fila}>
+        <button style={boton} disabled={!abierta || !yo} onClick={() => enviar('abrir clase', { type: 'set', key: 'clase', value: { id: Date.now().toString(36), anfitrion: yo } })}>Abrir clase</button>
+        <button style={boton} disabled={!abierta || !soyAnfitrion} onClick={limpiar}>Limpiar (anfitrión)</button>
+      </div>
+      <div style={fila}>
+        <input aria-label="Nombre" value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Tu nombre" style={{ padding: 6 }} />
+        <button style={boton} disabled={!abierta || !yo || !nombre.trim()} onClick={() => enviar('entrar', { type: 'set', key: 'alumno.' + yo, value: { nombre: nombre.trim().slice(0, 40), t: Date.now() } })}>Entrar</button>
+        <button style={boton} disabled={!abierta || !yo} onClick={() => enviar('pulsar', { type: 'add', key: 'pulsos.' + yo, by: 1 })}>Pulsar</button>
+        <button style={boton} disabled={!abierta || !yo} onClick={() => enviar('mano', { type: 'set', key: 'mano.' + yo, value: estado['mano.' + yo] ? null : { t: Date.now() } })}>Levantar la mano</button>
+        <button style={boton} disabled={!abierta || !yo} onClick={rafaga}>Ráfaga</button>
+      </div>
+      <div style={fila}>
+        {KB.map((kb) => (
+          <button key={kb} style={boton} disabled={!abierta || !yo} onClick={() => enviar('entrega ' + kb + ' KB', { type: 'set', key: 'entrega.' + yo, value: { datos: 'x'.repeat(kb * 1024), t: Date.now() } })}>Entrega de {kb} KB</button>
+        ))}
+        <button style={boton} disabled={!abierta || !yo} onClick={() => enviar('clase (no anfitrión)', { type: 'set', key: 'clase', value: { id: 'intruso', anfitrion: yo } })}>Probar a cambiar la clase</button>
+      </div>
+
+      <div style={caja}>
+        <strong>Alumnos</strong>
+        <ul>
+          {alumnos.map(([id, v]) => (
+            <li key={id}><code>{id}</code> {v && v.nombre} · pulsos {pulsos[id] || 0}{estado['mano.' + id] ? ' · ✋' : ''}</li>
+          ))}
+        </ul>
+      </div>
+
+      <div style={caja}>
+        <strong>Resultado para el agente</strong>
+        <pre data-testid="resultado" style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all', fontSize: 11, maxHeight: 320, overflow: 'auto' }}>{resumen}</pre>
+      </div>
+    </div>
+  )
+}

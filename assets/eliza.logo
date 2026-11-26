@@ -1,0 +1,117 @@
+; ELIZA en español, una adaptación didáctica en Logo.
+; Inspirada en el programa que Joseph Weizenbaum desarrolló en el MIT entre 1964 y 1966.
+; Prueba «Me siento alegre», «Quiero visitar a mi hermana» o «Adiós».
+
+PARA SEPARA :frase
+  LOCAL "palabras []
+  LOCAL "palabra SUBPALABRA 1 0 "x
+  LOCAL "digitos ["0 "1 "2 "3 "4 "5 "6 "7 "8 "9]
+  REPITE CUENTA :frase [
+    LOCAL "caracter LETRA CUENTAREP :frase
+    LOCAL "esparte ESALFABÉTICA :caracter
+    SI ESVACIA MIEMBRO :caracter :digitos = 0 [HAZ "esparte 1]
+    SISINO :esparte [
+      HAZ "palabra PALABRA :palabra :caracter
+    ] [
+      SI CUENTA :palabra > 0 [
+        HAZ "palabras PONULTIMO :palabra :palabras
+        HAZ "palabra SUBPALABRA 1 0 "x
+      ]
+    ]
+  ]
+  SI CUENTA :palabra > 0 [HAZ "palabras PONULTIMO :palabra :palabras]
+  DEVUELVE :palabras
+FIN
+
+PARA NORMALIZA :palabras
+  LOCAL "claves []
+  REPITE CUENTA :palabras [
+    HAZ "claves PONULTIMO (NORMALIZAPALABRA ELEMENTO CUENTAREP :palabras) :claves
+  ]
+  DEVUELVE :claves
+FIN
+
+PARA COINCIDE :patron :claves
+  REPITE CUENTA :patron [
+    SI (ELEMENTO CUENTAREP :patron = ELEMENTO CUENTAREP :claves) = 0 [DEVUELVE 0]
+  ]
+  DEVUELVE 1
+FIN
+
+PARA DESPUESDE :patron :claves :palabras
+  ; Solo devuelve una coincidencia si queda algo después del patrón.
+  LOCAL "largo CUENTA :patron
+  MIENTRAS CUENTA :claves > :largo [
+    SI COINCIDE :patron :claves [
+      REPITE :largo [HAZ "palabras MENOSPRIMERO :palabras]
+      DEVUELVE :palabras
+    ]
+    HAZ "claves MENOSPRIMERO :claves
+    HAZ "palabras MENOSPRIMERO :palabras
+  ]
+  DEVUELVE []
+FIN
+
+PARA REFLEJA :palabras
+  LOCAL "cambios [["YO "tú] ["ME "te] ["MI "tu] ["MIS "tus] ["MÍ "ti] ["CONMIGO "contigo] ["SOY "eres] ["ESTOY "estás] ["TENGO "tienes] ["PUEDO "puedes] ["QUIERO "quieres]]
+  LOCAL "reflejo []
+  REPITE CUENTA :palabras [
+    LOCAL "valor ELEMENTO CUENTAREP :palabras
+    LOCAL "clave NORMALIZAPALABRA :valor
+    REPITE CUENTA :cambios [
+      LOCAL "par ELEMENTO CUENTAREP :cambios
+      SI :clave = PRIMERO :par [HAZ "valor ULTIMO :par]
+    ]
+    HAZ "reflejo PONULTIMO :valor :reflejo
+  ]
+  DEVUELVE :reflejo
+FIN
+
+PARA RESPUESTA :palabras :claves
+  SI ESVACIA :claves [DEVUELVE ["Escribe "una "frase "para "que "podamos "continuar.]]
+
+  ; Cada regla contiene un patrón y el comienzo de una pregunta.
+  LOCAL "reglas [
+    [["ME "SIENTO] ["¿Desde "cuándo "te "sientes]]
+    [["QUIERO] ["¿Qué "cambiaría "si "consiguieras]]
+    [["NECESITO] ["¿Qué "te "hace "decir "que "necesitas]]
+    [["ESTOY] ["¿Desde "cuándo "estás]]
+    [["SOY] ["¿Qué "te "hace "decir "que "eres]]
+    [["PORQUE] ["¿Qué "te "hace "pensar "que]]
+  ]
+  REPITE CUENTA :reglas [
+    LOCAL "regla ELEMENTO CUENTAREP :reglas
+    LOCAL "resto DESPUESDE (PRIMERO :regla) :claves :palabras
+    SI ESVACIA :resto = 0 [
+      LOCAL "reflejo REFLEJA :resto
+      LOCAL "final PALABRA (ULTIMO :reflejo) "?
+      DEVUELVE FRASE (ULTIMO :regla) (PONULTIMO :final MENOSULTIMO :reflejo)
+    ]
+  ]
+
+  LOCAL "familia ["FAMILIA "MADRE "PADRE "HERMANA "HERMANO]
+  REPITE CUENTA :familia [
+    SI ESVACIA MIEMBRO (ELEMENTO CUENTAREP :familia) :claves = 0 [
+      DEVUELVE ["¿Qué "te "gustaría "contarme "sobre "tu "familia?]
+    ]
+  ]
+  SI PRIMERO :claves = "HOLA [DEVUELVE ["Hola. "¿Qué "te "gustaría "contarme?]]
+  DEVUELVE ELIGE [
+    ["¿Podrías "contarme "algo "más?]
+    ["¿Qué "parte "de "eso "te "parece "más "importante?]
+    ["¿Puedes "darme "un "ejemplo?]
+  ]
+FIN
+
+ESCRIBE ["ELIZA: "Hola. "¿De "qué "quieres "hablar? "Escribe "ADIÓS "para "terminar.]
+MIENTRAS 1 [
+  HAZ "entrada LEEPALABRA
+  HAZ "palabras SEPARA :entrada
+  HAZ "claves NORMALIZA :palabras
+  SI CUENTA :entrada > 0 [ESCRIBE PALABRA "Tú: :entrada]
+  SI ESVACIA MIEMBRO :claves [["ADIÓS] ["ADIOS] ["SALIR] ["HASTA "LUEGO]] = 0 [
+    ESCRIBE ["ELIZA: "Hasta "luego. "Gracias "por "conversar.]
+    ALTO
+  ]
+  ESCRIBE FRASE "ELIZA: RESPUESTA :palabras :claves
+]

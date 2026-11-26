@@ -1,0 +1,63 @@
+; Mini-Wordle · cuatro letras, seis intentos.
+; V = exacta · A = en otra posición · · = sin coincidencia disponible.
+
+PARA PISTA :secreta :intento
+  HAZ "marcas "····
+  HAZ "resto :secreta
+  HAZ "i 1
+
+  ; Primero, reserva todas las coincidencias exactas.
+  REPITE 4 [
+    SI LETRA :i :intento = LETRA :i :secreta [
+      HAZ "marcas PONLETRA :i "V :marcas
+      HAZ "resto PONLETRA :i "· :resto
+    ]
+    HAZ "i :i + 1
+  ]
+
+  ; Luego consume una sola letra libre por coincidencia desplazada.
+  HAZ "i 1
+  REPITE 4 [
+    SI LETRA :i :marcas = "· [
+      HAZ "j 1
+      MIENTRAS :j < 5 [
+        SISINO LETRA :i :intento = LETRA :j :resto [
+          HAZ "marcas PONLETRA :i "A :marcas
+          HAZ "resto PONLETRA :j "· :resto
+          HAZ "j 5
+        ] [
+          HAZ "j :j + 1
+        ]
+      ]
+    ]
+    HAZ "i :i + 1
+  ]
+  ESCRIBE :intento
+  ESCRIBE :marcas
+FIN
+
+; Banco de palabras consecutivas de cuatro letras.
+HAZ "banco "CASAMESALUNARANATAZADADOMAPAPERATRENNUBEFLORLAGOPATOSAPOGATOLOROVELABOTAROSARAMACOPACUNALANAROCA
+HAZ "inicio 1 + 4 * AZAR (CUENTA :banco / 4)
+HAZ "clave SUBPALABRA :inicio 4 :banco
+HAZ "intentos 0
+MIENTRAS :intentos < 6 [
+  HAZ "jugada NORMALIZAPALABRA LEEPALABRA
+  HAZ "valida 0
+  SI CUENTA :jugada = 4 [
+    SI ESALFABÉTICA :jugada [HAZ "valida 1]
+  ]
+
+  SISINO :valida [
+    HAZ "intentos :intentos + 1
+    PISTA :clave :jugada
+    SI :jugada = :clave [
+      ESCRIBE "¡Acertaste!
+      ALTO
+    ]
+  ] [
+    ESCRIBE "Escribe-cuatro-letras.
+  ]
+]
+ESCRIBE "Solución:
+ESCRIBE :clave
