@@ -205,6 +205,52 @@ export const challenges = {
       return `Hay ${plural(footprints.size, "marca visible", "marcas visibles")}. ¿Cuántas vueltas de REPITE dejan siete?`;
     },
   },
+  cartasDePuntos: {
+    goal: "Forma el 13 con las cartas boca arriba.",
+    check({ arcs, prints }) {
+      const dots = count(arcs, ({ radius, angle }) => near(radius, 5) && near(Math.abs(angle), 360));
+      const shown = lastPrint(prints, /=\s*(-?\d+)\s*$/);
+      if (dots !== 13) return `Hay ${plural(dots, "punto", "puntos")} a la vista. ¿Qué cartas suman 13?`;
+      if (!shown || Number(shown[1]) !== 13) return "Los puntos suman 13, pero el resultado no dice 13. Conserva la suma del programa.";
+      return true;
+    },
+  },
+  paquetesDeDos: {
+    goal: "Escribe el 25 en binario dividiendo entre 2.",
+    check({ prints }) {
+      const steps = count(prints, line => /entre 2 da/.test(line));
+      const result = lastPrint(prints, /^(-?\d+) en binario es (.*)$/);
+      if (!result || result[1] !== "25") return "Empieza por el 25: cambia el número de la primera línea.";
+      if (steps !== 5) return `Hay ${plural(steps, "división", "divisiones")}; el 25 necesita 5 hasta llegar a 0.`;
+      if (result[2].replace(/\s+/g, "") !== "11001") return "Los restos, leídos de abajo arriba, forman el binario. Conserva PONPRIMERO.";
+      return true;
+    },
+  },
+  cuentaConLuces: {
+    goal: "Cuenta de 0 a 31 con cinco luces.",
+    check({ arcs, fills, prints }) {
+      const lights = count(arcs, ({ radius, angle }) => near(radius, 18) && near(Math.abs(angle), 360));
+      const lit = count(fills, fill => fill.color === "#ffd166");
+      const numbers = prints.filter(line => /^\d+$/.test(line)).map(Number);
+      if (lights !== 5) return `Al final se ven ${plural(lights, "luz", "luces")}; el reto pide 5.`;
+      if (numbers.at(-1) !== 31) return `La cuenta termina en ${numbers.at(-1) ?? "nada"}. ¿Hasta dónde llegan cinco luces?`;
+      if (numbers.length !== 32 || numbers.some((n, i) => n !== i)) return "Cuenta todos los números, de 0 a 31, sin saltarte ninguno.";
+      if (lit !== 5) return "En el 31 tienen que estar encendidas las cinco luces.";
+      return true;
+    },
+  },
+  cerosYUnos: {
+    goal: "Dibuja la boca: en la sexta fila, pinta las cuatro casillas del centro.",
+    check({ raster }) {
+      if (!raster) return "Usa LIENZO para pintar el dibujo.";
+      const rows = raster.rows.map(row => (row ?? []).map(index => (index ? 1 : 0)).join(""));
+      const face = ["00111100", "01000010", "10100101", "10000001", "10000001", "10111101", "01000010", "00111100"];
+      if (rows[5] !== face[5]) return `La sexta fila dibuja ${rows[5] ?? "nada"}. Cambia los ceros del centro por unos y deja los bordes como están.`;
+      const changed = face.findIndex((row, i) => rows[i] !== row);
+      if (changed !== -1) return `La fila ${changed + 1} ha cambiado. Deja el resto de la cara como estaba.`;
+      return true;
+    },
+  },
   palabras: {
     goal: "Usa una palabra de siete letras y escribe también su última letra.",
     check({ prints }) {

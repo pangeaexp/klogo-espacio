@@ -7,12 +7,13 @@ const allLessons = Object.keys(lessons);
 const turtleBasics = ["tortuga", "bucles", "poligonos"];
 const colorAndTrace = ["grosores", "rotulos", "relleno", "arcos", "rosetaColores"];
 const numeration = ["cuentaLasHuellas", "saltaEnLaRecta", "paquetesDeDiez", "mismasCifras"];
+const binary = ["cartasDePuntos", "paquetesDeDos", "cuentaConLuces", "cerosYUnos"];
 
 const firstSteps = [...turtleBasics, ...colorAndTrace, ...numeration, "baliza", "melodia", "piano"];
 const explorer = [
   ...turtleBasics, "variables", "aleatorio", "argumentos", "desde",
   ...colorAndTrace, "art",
-  ...numeration,
+  ...numeration, ...binary,
   "recursion", "devuelve", "circulo", "rosa",
   "baliza", "clics", "melodia", "piano",
   "cubo3d", "fractales",

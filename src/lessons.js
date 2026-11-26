@@ -460,6 +460,172 @@ PARA HUELLA :numero
   PONRUMBO 90
 FIN`,
   },
+  cartasDePuntos: {
+    name: "Binario · Cartas de puntos",
+    outcome: "Cada carta tiene el doble de puntos que la de su derecha: 8, 4, 2 y 1. Las cartas boca arriba se suman. ¿Qué número forman 1 0 1 1? Predice y pulsa Ejecutar.",
+    source: `; Cada 1 es una carta boca arriba y cada 0, una carta boca abajo.
+; Para el reto, cambia los ceros y unos de la lista.
+HAZ "cartas [1 0 1 1]
+
+PARA VE :x :y
+  SUBELÁPIZ
+  PONXY :x :y
+  BAJALÁPIZ
+FIN
+
+PARA CARTA :x :puntos :arriba
+  COLORLÁPIZ "#193b34
+  GROSORLÁPIZ 2
+  VE :x 50
+  PONRUMBO 90
+  REPITE 2 [ AVANZA 48 GIRADERECHA 90 AVANZA 84 GIRADERECHA 90 ]
+  SISINO :arriba = 1 [
+    COLORLÁPIZ "#974418
+    REPITE :puntos [
+      HAZ "i (CUENTAREP - 1)
+      VE (:x + 14 + 20 * (RESTO :i 2)) (36 - 18 * (COCIENTE :i 2))
+      ARCO 360 5
+    ]
+  ] [
+    COLORLÁPIZ "#23715a
+    VE (:x + 24) 8
+    RELLENA
+  ]
+  COLORLÁPIZ "#193b34
+  SUBELÁPIZ
+  PONXY (:x + 18) -56
+  ROTULA :puntos
+FIN
+
+PONCOLORFONDO "#fff9ec
+OCULTATORTUGA
+HAZ "valor 8
+HAZ "total 0
+HAZ "x -128
+PARACADA "carta :cartas [
+  CARTA :x :valor :carta
+  SI :carta = 1 [ HAZ "total :total + :valor ]
+  HAZ "valor :valor / 2
+  HAZ "x :x + 66
+]
+HAZ "resultado FRASE :cartas FRASE "= :total
+SUBELÁPIZ
+PONXY -128 74
+ROTULA :resultado
+ESCRIBE :resultado`,
+  },
+  paquetesDeDos: {
+    name: "Binario · Paquetes de dos",
+    outcome: "En binario se hacen paquetes de dos en lugar de diez. ¿Cuántas cifras tendrá el 6 en binario? Predice, pulsa Ejecutar y lee los restos de abajo arriba.",
+    source: `; Divide entre 2 una y otra vez: cada resto es una cifra del binario.
+; Los restos, leídos de abajo arriba, forman el número en binario.
+; Para el reto, cambia el número de la primera línea.
+HAZ "numero 6
+
+PONCOLORFONDO "#fff9ec
+OCULTATORTUGA
+COLORLÁPIZ "#193b34
+HAZ "n :numero
+HAZ "cifras []
+HAZ "y 80
+MIENTRAS :n > 0 [
+  HAZ "resto RESTO :n 2
+  HAZ "paso FRASE :n FRASE [entre 2 da] FRASE (COCIENTE :n 2) FRASE [sobra] :resto
+  SUBELÁPIZ
+  PONXY -120 :y
+  ROTULA :paso
+  ESCRIBE :paso
+  HAZ "cifras PONPRIMERO :resto :cifras
+  HAZ "n COCIENTE :n 2
+  HAZ "y :y - 26
+]
+HAZ "resultado FRASE :numero FRASE [en binario es] :cifras
+COLORLÁPIZ "#23715a
+PONXY -120 (:y - 14)
+ROTULA :resultado
+ESCRIBE :resultado`,
+  },
+  cuentaConLuces: {
+    name: "Binario · Cuenta con luces",
+    outcome: "Cuatro luces cuentan de 0 a 15. ¿Qué luces estarán encendidas en el 5? Predice y mira cómo cuentan al pulsar Ejecutar.",
+    source: `; Cada luz vale el doble que la luz de su derecha.
+; Una luz encendida suma su valor; una apagada, nada.
+; Para el reto, cambia cuántas luces hay y hasta dónde cuentas.
+HAZ "luces 4
+HAZ "hasta 15
+
+PARA VE :x :y
+  SUBELÁPIZ
+  PONXY :x :y
+  BAJALÁPIZ
+FIN
+
+PARA LUZ :x :encendida :valor
+  COLORLÁPIZ "#193b34
+  GROSORLÁPIZ 2
+  VE :x 10
+  ARCO 360 18
+  SI :encendida = 1 [
+    COLORLÁPIZ "#ffd166
+    RELLENA
+  ]
+  COLORLÁPIZ "#193b34
+  SUBELÁPIZ
+  PONXY (:x - 6) -30
+  ROTULA :valor
+FIN
+
+PARA LUCES :n
+  HAZ "valor POTENCIA 2 (:luces - 1)
+  HAZ "x (0 - 22 * (:luces - 1))
+  REPITE :luces [
+    LUZ :x (RESTO (COCIENTE :n :valor) 2) :valor
+    HAZ "valor :valor / 2
+    HAZ "x :x + 44
+  ]
+  SUBELÁPIZ
+  PONXY -10 52
+  ROTULA :n
+FIN
+
+DESDE "n 0 :hasta 1 [
+  BORRARPANTALLA
+  PONCOLORFONDO "#fff9ec
+  OCULTATORTUGA
+  LUCES :n
+  ESCRIBE :n
+  ESPERA 400
+]`,
+  },
+  cerosYUnos: {
+    name: "Binario · Ceros y unos",
+    outcome: "Así se guardan los dibujos: cada casilla es un 0 o un 1. ¿Dónde están los ojos en las palabras de la lista? Ejecuta y compara.",
+    source: `; Cada fila del dibujo es una palabra de ceros y unos.
+; Un 1 pinta la casilla y un 0 la deja en blanco.
+; Para el reto, cambia los ceros y unos de la sexta fila.
+LIENZO 8 8
+PALETA ["#fff9ec "#23715a]
+HAZ "dibujo [
+  "00111100
+  "01000010
+  "10100101
+  "10000001
+  "10000001
+  "10000001
+  "01000010
+  "00111100
+]
+
+HAZ "fila 0
+PARACADA "linea :dibujo [
+  DESDE "columna 1 8 1 [
+    SI (LETRA :columna :linea) = "1 [
+      PONPIXEL (:columna - 1) :fila 1
+    ]
+  ]
+  HAZ "fila :fila + 1
+]`,
+  },
   palabras: {
     name: "Palabras · Letras y fragmentos",
     outcome: "Cuenta caracteres y extrae letras de una palabra con tilde y ñ.",

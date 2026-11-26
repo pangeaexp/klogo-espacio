@@ -72,6 +72,23 @@ const hintsByLesson = {
     [/^\s*REPITE\b/i, "Mira el número que va después de REPITE. ¿Cuántas marcas ves con ese número?"],
     [/^\s*HUELLA\s+CUENTAREP\b/i, "Cada vuelta deja una sola marca. Pon 7 después de REPITE para dibujar siete huellas."],
   ],
+  cartasDePuntos: [
+    [/^\s*HAZ\s+"cartas\b/i, "Cada número de la lista es una carta: 1 boca arriba, 0 boca abajo. ¿Qué cartas de 8, 4, 2 y 1 suman 13?"],
+    [/^\s*PARACADA\b/i, "8 + 4 + 1 = 13. Pon boca arriba la de 8, la de 4 y la de 1, y boca abajo la de 2."],
+  ],
+  paquetesDeDos: [
+    [/^\s*HAZ\s+"numero\b/i, "El número que se pasa a binario está en la primera línea. Cámbialo por 25."],
+    [/^\s*MIENTRAS\b/i, "El bucle divide entre 2 hasta llegar a 0. Lee los restos de abajo arriba: ese es el binario."],
+  ],
+  cuentaConLuces: [
+    [/^\s*HAZ\s+"luces\b/i, "Con una luz más, la de la izquierda vale 16. Pon 5 luces."],
+    [/^\s*HAZ\s+"hasta\b/i, "Con cinco luces encendidas se ve 16 + 8 + 4 + 2 + 1. Cuenta hasta ese número."],
+  ],
+  cerosYUnos: [
+    [/^\s*HAZ\s+"dibujo\b/i, "Cada palabra de la lista es una fila del dibujo, de arriba abajo. Busca la sexta."],
+    // The sixth row is the third 10000001 of the list.
+    [/^\s*"10000001\b/, "La sexta fila es 10000001. Cambia los ceros del centro para que quede 10111101.", 3],
+  ],
   palabras: [
     [/^\s*HAZ\s+"texto\b/i, "Busca dónde se guarda la palabra que se analiza."],
     [/^\s*ESCRIBE\s+LETRA\b/i, "Elige una palabra de siete letras. Para escribir la última, usa CUENTA :texto como posición de LETRA."],
@@ -158,10 +175,12 @@ const hintsByLesson = {
   ],
 };
 
+// A hint may point to the nth line its anchor matches (the first by default).
 export function locateChallengeHints(lesson, lines) {
   if (!Object.hasOwn(hintsByLesson, lesson)) return [];
-  return hintsByLesson[lesson].map(([anchor, text]) => {
-    const match = lines.findIndex(line => anchor.test(line.split(";", 1)[0]));
+  return hintsByLesson[lesson].map(([anchor, text, occurrence = 1]) => {
+    let seen = 0;
+    const match = lines.findIndex(line => anchor.test(line.split(";", 1)[0]) && ++seen === occurrence);
     return { text, line: match < 0 ? null : match + 1 };
   });
 }
