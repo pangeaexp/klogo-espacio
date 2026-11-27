@@ -105,6 +105,27 @@ function unclosedBracket(lines) {
   return open[0] ?? null;
 }
 
+// The «(» … «)» around a 1-based column on its line, or null.
+function parenthesesAround(chars, column) {
+  let open = -1;
+  for (let i = column - 2, depth = 0; i >= 0; i -= 1) {
+    if (chars[i] === ")") depth += 1;
+    else if (chars[i] === "(") {
+      if (depth === 0) { open = i; break; }
+      depth -= 1;
+    }
+  }
+  if (open < 0) return null;
+  for (let i = open + 1, depth = 0; i < chars.length; i += 1) {
+    if (chars[i] === "(") depth += 1;
+    else if (chars[i] === ")") {
+      if (depth === 0) return { column: open + 1, length: i - open + 1, inner: chars.slice(open + 1, i).join("") };
+      depth -= 1;
+    }
+  }
+  return null;
+}
+
 const quote = name => `«${name}»`;
 
 // Returns { hint, fix } for a diagnostic of the interpreter, or null.
@@ -147,6 +168,33 @@ export function diagnosticHelp(diagnostic, source) {
       };
     }
     return { hint: `Antes de usar :${named}, dale un valor. Por ejemplo: HAZ "${named} 10` };
+  }
+
+  // [Tengo 5 años (casi 6)]: text in parentheses that start a list element.
+  const inList = /^Dentro de una lista, lo que empieza con «\(» se calcula, y «([^»]+)» no es un valor\.$/.exec(message);
+  if (inList) {
+    const word = inList[1];
+    const span = parenthesesAround(lines[line - 1] ?? [], column);
+    // A misspelt function has inputs after it, as in (CUENTE :l); a short
+    // word alone, as in (Ana), is text.
+    const hasInputs = !span || span.inner.trim() !== word;
+    const { procedures } = programNames(source);
+    const best = Array.from(word).length >= 4 && hasInputs ? closest(word, [...procedures, ...commands]) : null;
+    if (best) {
+      const text = word === word.toLowerCase() ? best.name.toLowerCase() : best.name;
+      return {
+        hint: `¿Quisiste decir ${best.name}?`,
+        fix: { label: `Cambiar a ${text}`, line, column, length: Array.from(word).length, text },
+      };
+    }
+    if (!span) return { hint: "Si es texto, quita los paréntesis o pégalos a la palabra anterior." };
+    const before = (lines[line - 1] ?? []).slice(0, span.column - 1).join("");
+    const previous = /([^\s\[\]]+)\s*$/.exec(before)?.[1];
+    const glued = previous ? ` o pégalos a la palabra anterior: ${previous}(${span.inner})` : "";
+    return {
+      hint: `Si es texto, quita los paréntesis${glued}.`,
+      fix: { label: "Quitar los paréntesis", line, column: span.column, length: span.length, text: span.inner },
+    };
   }
 
   if (message === "Se esperaba un valor o una expresión.") {
