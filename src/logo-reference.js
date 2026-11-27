@@ -257,8 +257,8 @@ export const logoReference = [
     title: "Palabras",
     entries: [
       { name: "PALABRA", aliases: ["WORD"],
-        syntax: "PALABRA primera segunda", args: "Dos palabras.",
-        result: "Las concatena sin añadir un separador.",
+        syntax: "PALABRA primera segunda", args: "Dos palabras o números.",
+        result: "Las concatena sin añadir un separador. Un número se escribe como lo muestra ESCRIBE: PALABRA \"nivel 1 da nivel1.",
         example: 'ESCRIBE PALABRA "BIEN "VENIDA' },
       { name: "SUBPALABRA", aliases: ["SUBWORD"],
         syntax: "SUBPALABRA inicio longitud palabra", args: "Una posición desde 1, una longitud no negativa y una palabra.",
