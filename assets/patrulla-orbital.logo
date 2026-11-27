@@ -8,7 +8,7 @@ FIN
 PARA PREPARAOLEADA :carriles :fila
   HAZ "drones []
   MIENTRAS ESVACIA :carriles = 0 [
-    HAZ "drones APILA [CIMA :carriles :fila] :drones
+    HAZ "drones APILA [(CIMA :carriles) :fila] :drones
     HAZ "carriles DESAPILA :carriles
     HAZ "fila :fila - (9 - :oleada)
   ]

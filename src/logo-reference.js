@@ -237,8 +237,8 @@ export const logoReference = [
     entries: [
       { name: "ESCRIBE", aliases: ["PRINT", "PR"],
         syntax: "ESCRIBE valor", args: "Una expresión que produzca un número, una palabra o una lista.",
-        result: "Muestra el valor en Salida. Quita los corchetes exteriores de las listas y conserva los de las sublistas.",
-        example: "ESCRIBE [Hola mundo]" },
+        result: "Muestra el valor en Salida. Quita los corchetes exteriores de las listas y conserva los de las sublistas. Dentro de una lista, las palabras y los signos se escriben tal cual; solo se calculan las :variables y lo que va entre paréntesis.",
+        example: "ESCRIBE [Hola mundo]\nESCRIBE [Tengo (2 + 3) años y sumo 2 = 2]" },
       { name: "LEEPALABRA", aliases: ["READWORD"],
         syntax: "LEEPALABRA", args: "Sin argumentos. Escribe el texto en el campo que aparece al ejecutar.",
         result: "Espera la entrada y devuelve el texto, incluidos los espacios.",
