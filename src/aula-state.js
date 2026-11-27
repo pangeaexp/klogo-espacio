@@ -182,10 +182,11 @@ export function endClassKeys(state) {
   return Object.keys(state ?? {}).filter(key => key === "clase" || ownPrefixes.some(prefix => key.startsWith(prefix)));
 }
 
+export const timeOfDay = new Intl.DateTimeFormat("es", { timeStyle: "short" });
+
 // The class as a table for a spreadsheet. As a file: semicolons, as Spanish
 // locales expect, and a byte order mark so accents open well. To paste:
 // tabs, which spreadsheets split into columns, and no byte order mark.
-const timeOfDay = new Intl.DateTimeFormat("es", { timeStyle: "short" });
 const cell = separator => value => {
   const text = String(value ?? "");
   return text.includes(separator) || /["\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
