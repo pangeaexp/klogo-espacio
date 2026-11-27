@@ -1,4 +1,4 @@
-// The library aula.mdx passes to KLogo: the teacher's `programas`, or a
+// The library index.mdx passes to KLogo: the teacher's `programas`, or a
 // student's own notebook (`cuadernos`), as aula-role.js tells them apart. The `key`
 // remounts ProgramLibrary when the viewer becomes known, so each hook keeps
 // its order.

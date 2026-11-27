@@ -1,11 +1,11 @@
-// Who this page is in the Aula (aula.mdx):
+// Who this page is in the Aula (index.mdx):
 //   "teacher": the person whose Kunobi hosts the room (the Space's owner);
 //              uses their own `programas` and `progreso` and sees the notebooks.
 //   "student": anyone else: a visitor of the web link, or another Kunobi
 //              account the Space is shared with; uses their own notebook.
 //   null:      not known yet (the room is opening).
 // The page cannot tell accounts apart, but the room can: `anfitrion` is a
-// host-only key (aula.mdx rules), so writing it succeeds only for the host.
+// host-only key (index.mdx rules), so writing it succeeds only for the host.
 // A person whose write is denied, or whose room does not open, is a student,
 // so nothing of theirs ever lands in the teacher's stores.
 import { useEffect, useSyncExternalStore } from "react";

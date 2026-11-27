@@ -1,4 +1,4 @@
-// The Aula as aula.mdx mounts it: AulaPanel plus what the notebooks keep.
+// The Aula as index.mdx mounts it: AulaPanel plus what the notebooks keep.
 // A student's name goes to their notebook and is suggested next time; only
 // the teacher (whose Kunobi hosts the room) gets every notebook (NotebooksPanel).
 import { AulaPanel } from "./AulaPanel.jsx";

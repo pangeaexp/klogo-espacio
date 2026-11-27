@@ -3,7 +3,7 @@
 //     save(id | null, program) → "applied" | "full" | "too-big" | "error",
 //     rename(id, name) → boolean, remove(id) → boolean }
 // - useProgramsLibrary: the `programas` LiveStore (the person's, in Kunobi).
-// - useCuadernoLibrary: a student's own row of `cuadernos` (aula.mdx), with
+// - useCuadernoLibrary: a student's own row of `cuadernos` (index.mdx), with
 //   SLOTS program slots: web-link visitors and Kunobi accounts other than
 //   the teacher's (aula-role.js).
 // Edits assign rows directly: with `??=` a page's draft may report a row
@@ -121,7 +121,7 @@ export function useNotebooks() {
   };
 }
 
-// Who this page is on aula.mdx: "student" (a web-link visitor or another
+// Who this page is on index.mdx: "student" (a web-link visitor or another
 // Kunobi account), "person" (the teacher, whose Kunobi hosts the Aula's
 // room) or null while that is not known. See aula-role.js.
 export function useViewerKind() {
@@ -133,7 +133,7 @@ export function useViewerKind() {
   return role === "teacher" ? "person" : "student";
 }
 
-// The progress hook aula.mdx passes to KLogo: the teacher's `progreso`,
+// The progress hook index.mdx passes to KLogo: the teacher's `progreso`,
 // a student's notebook. Both hooks always run, so
 // the hook order never changes.
 const notReady = { ready: false, canEdit: false, done: null, add: () => Promise.resolve(false), clear: () => Promise.resolve(false) };

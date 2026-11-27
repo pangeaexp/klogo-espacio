@@ -9,13 +9,12 @@ import { textSizes } from "./text-size.js";
 const primaryWidths = ["Ejecutar", "Pausar", "Continuar"];
 
 export function LogoToolbar({ execution, files, editorLocked, picker, reloadTarget, reference,
-  ProgramLibrary, libraryHref, library, presentation, gallery, image, feedback }) {
+  ProgramLibrary, library, presentation, gallery, image, feedback }) {
   const { phase, inProgress, canPause, isHeld, animating, onPrimary, onStep, onStop } = execution;
   const { source, fileName, fileStatus, openingFile, canDownloadFile, fileInputRef,
     openLogo, downloadLogo, copyLogo } = files;
   const { presenting, textSize, startPresenting, stopPresenting, changeTextSize } = presentation;
   const { note, audioUnavailable, showKeyInput, keyInputRef } = feedback;
-  const showLibraryLink = libraryHref && typeof window !== "undefined" && window.location.protocol === "kunobi-mdx:";
   const fileOptionsRef = useRef(null);
   const fileOptionsButtonRef = useRef(null);
   const canStep = (phase === "ready" || isHeld) && !openingFile;
@@ -95,11 +94,7 @@ export function LogoToolbar({ execution, files, editorLocked, picker, reloadTarg
             <ProgramLibrary compact source={source} fileName={fileName} locked={editorLocked} origin={library.origin}
               describeOrigin={library.describeOrigin} onOpen={library.onOpen} onSaved={library.onSaved} />
           )}
-          {showLibraryLink ? (
-            <a className="kl-secondary kl-tool kl-icon-action" href={libraryHref} aria-label="Mis programas" title="Mis programas">
-              <ToolbarIcon name="folder" />
-            </a>
-          ) : !canDownloadFile && !ProgramLibrary && (
+          {!canDownloadFile && !ProgramLibrary && (
             <button type="button" className="kl-secondary kl-tool kl-icon-action" aria-label="Copiar código" title="Copiar código"
               disabled={openingFile} onClick={copyLogo}><ToolbarIcon name="copy" /></button>
           )}
@@ -127,7 +122,7 @@ export function LogoToolbar({ execution, files, editorLocked, picker, reloadTarg
                   downloadLogo();
                 }}><ToolbarIcon name="download" />Descargar .logo</button>
               )}
-              {!canDownloadFile && (showLibraryLink || ProgramLibrary) && (
+              {!canDownloadFile && ProgramLibrary && (
                 <button type="button" className="kl-secondary" disabled={openingFile} onClick={() => {
                   closeFileOptions();
                   copyLogo();

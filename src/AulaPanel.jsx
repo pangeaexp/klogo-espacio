@@ -1,8 +1,8 @@
-// The Aula bar of aula.mdx: a class shared in a Kunobi room. The teacher (who
+// The Aula bar of index.mdx: a class shared in a Kunobi room. The teacher (who
 // hosts the room) opens a class and sees who is in it, in which lesson, how
 // many challenges each has passed and who raised a hand. Students enter with
 // a name. The room saves nothing and lasts while the teacher's page is open;
-// on aula.mdx, AulaClassroom.jsx adds what is kept: the name in the student's
+// on index.mdx, AulaClassroom.jsx adds what is kept: the name in the student's
 // notebook (`savedName`, `onNameChosen`) and the teacher's notebooks (`extra`).
 import { useEffect, useRef, useState } from "react";
 import { useSession } from "kunobi";

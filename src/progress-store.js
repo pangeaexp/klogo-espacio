@@ -1,5 +1,5 @@
 // The challenge progress kept in the `progreso` LiveStore: the teacher's, on
-// aula.mdx (through useAulaProgress in library-stores.js). The store's rules (`read` without
+// index.mdx (through useAulaProgress in library-stores.js). The store's rules (`read` without
 // `others`) keep its rows from the Aula's web-link visitors. The front page
 // never imports it. One row per lesson met, keyed by its id, so
 // two devices adding lessons at once do not overwrite each other.

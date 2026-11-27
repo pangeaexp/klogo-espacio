@@ -35,8 +35,8 @@ function useNoProgressStore() {
   return null;
 }
 
-export function KLogo({ workerSource, wasmUrl, miniWordle, torresDeHanoi, mandelbrot, patrullaOrbital, eliza, treasureMap, ProgramLibrary, libraryHref, Classroom, useProgressStore = useNoProgressStore }) {
-  // A hook from the page (aula.mdx passes useAulaProgress, library-stores.js);
+export function KLogo({ workerSource, wasmUrl, miniWordle, torresDeHanoi, mandelbrot, patrullaOrbital, eliza, treasureMap, ProgramLibrary, Classroom, useProgressStore = useNoProgressStore }) {
+  // A hook from the page (index.mdx passes useAulaProgress, library-stores.js);
   // it never changes during a visit, so the hook order stays the same.
   const progressStore = useProgressStore();
   const isMobile = useSyncExternalStore(subscribeToViewport, mobileViewport, desktopViewport);
@@ -437,7 +437,7 @@ export function KLogo({ workerSource, wasmUrl, miniWordle, torresDeHanoi, mandel
             expanded: Boolean(editorReference), onOpen: openReference,
             onSyntax: () => { setActiveTab("code"); openEditorReference(); },
           }}
-          ProgramLibrary={ProgramLibrary} libraryHref={libraryHref}
+          ProgramLibrary={ProgramLibrary}
           library={{
             origin, describeOrigin: key => originName(key, otherExamples),
             onOpen: (program, name, savedOrigin) => { openEditorProgram(program, name); setOrigin(savedOrigin ?? ""); },

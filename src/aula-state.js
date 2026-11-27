@@ -2,7 +2,7 @@
 // student shows the teacher, and what the host may clean up. The page reads
 // and writes the room in AulaPanel.jsx.
 //
-// Keys (rules in aula.mdx): `clase` is the host's; `alumno.<id>`,
+// Keys (rules in index.mdx): `clase` is the host's; `alumno.<id>`,
 // `mano.<id>` and `entrega.<id>` are each participant's own.
 import { lessons } from "./lessons.js";
 import { defaultFileName } from "./draft.js";

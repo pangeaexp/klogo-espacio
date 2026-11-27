@@ -1,8 +1,20 @@
 ---
 title: KLogo
+kunobi:
+  webEdits: write
+  stores: [cuadernos, programas, progreso]
+  rooms:
+    aula:
+      model: map
+      rules:
+        host: [clase, anfitrion]
+        own: [alumno, mano, entrega]
 ---
 
 import { KLogo } from './src/KLogo.jsx'
+import { AulaLibrary } from './src/AulaLibrary.jsx'
+import { AulaClassroom } from './src/AulaClassroom.jsx'
+import { useAulaProgress } from './src/library-stores.js'
 import workerSource from './assets/klogo-worker.js?raw'
 import wasmUrl from './assets/klogo.wasm'
 import miniWordle from './assets/mini-wordle.logo?raw'
@@ -12,4 +24,4 @@ import patrullaOrbital from './assets/patrulla-orbital.logo?raw'
 import eliza from './assets/eliza.logo?raw'
 import treasureMap from './assets/mapa-del-tesoro.logo?raw'
 
-<KLogo workerSource={workerSource} wasmUrl={wasmUrl} miniWordle={miniWordle} torresDeHanoi={torresDeHanoi} mandelbrot={mandelbrot} patrullaOrbital={patrullaOrbital} eliza={eliza} treasureMap={treasureMap} libraryHref="./aula.mdx" />
+<KLogo Classroom={AulaClassroom} ProgramLibrary={AulaLibrary} useProgressStore={useAulaProgress} workerSource={workerSource} wasmUrl={wasmUrl} miniWordle={miniWordle} torresDeHanoi={torresDeHanoi} mandelbrot={mandelbrot} patrullaOrbital={patrullaOrbital} eliza={eliza} treasureMap={treasureMap} />
