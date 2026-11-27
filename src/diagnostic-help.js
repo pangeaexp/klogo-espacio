@@ -136,6 +136,18 @@ export function diagnosticHelp(diagnostic, source) {
   const { line, column, message } = diagnostic;
   const named = /«([^»]+)»/.exec(message)?.[1];
 
+  // PI or CUENTA [a b] alone: a function whose value nothing uses.
+  if (diagnostic.code === "function_as_command" && named) {
+    const entry = commandByName.get(fold(named))?.entry;
+    const example = entry?.example?.split("\n").find(text => /^ESCRIBE\b/i.test(text));
+    const name = entry?.name ?? named.toUpperCase();
+    const command = named === named.toLowerCase() ? "escribe" : "ESCRIBE";
+    return {
+      hint: `${name} calcula un valor, pero solo no hace nada: ponlo detrás de una orden que lo use${example ? `, por ejemplo ${example}` : ", como ESCRIBE"}.`,
+      fix: { label: `Añadir ${command} delante`, line, column, length: 0, text: `${command} ` },
+    };
+  }
+
   if (diagnostic.code === "unknown_command" && named) {
     const written = wordAt(lines, line, column) || named;
     const fix = text => ({ label: `Cambiar a ${text}`, line, column, length: Array.from(written).length, text });
